@@ -3,11 +3,11 @@ package com.example.myapp.logic
 import androidx.compose.ui.graphics.Color
 import com.example.myapp.ui.theme.*
 
+
 class Game constructor(
     var gameOver: Boolean = false,
     var field: MutableMap<Box, Int?> = mutableMapOf(),
     var score: Int = 0,
-    var highScore: Int = 0,
 ) {
     init {
         getStartField()
@@ -16,6 +16,7 @@ class Game constructor(
     }
 
     fun moveField(direction: Direction) {
+
         if (!gameOver) {
             val start = field.toMap()
             field.forEach { (box, value) ->
@@ -38,11 +39,12 @@ class Game constructor(
             }
             field = overwriteField()
             checkGameOver()
+
         }
     }
 
+    fun checkGameOver() {
 
-    private fun checkGameOver() {
         var check = true
         if (getEmptyBoxs().isEmpty()) {
             field.forEach { (box, value) ->
@@ -53,14 +55,10 @@ class Game constructor(
                 }
             }
             if (check) {
-                if (score > highScore) {
-                    highScore = score
-                }
                 gameOver = true
             }
         }
     }
-
 
     private fun nextBox(direction: Direction, box: Box): Box {
         val vector = direction.getVector()
@@ -84,7 +82,7 @@ class Game constructor(
         return allBoxes
     }
 
-    private fun createRandomBox(): Pair<Box, Int>? {
+    fun createRandomBox(): Pair<Box, Int>? {
         val emptyBoxes = getEmptyBoxs()
         return if (emptyBoxes.isEmpty()) null
         else {
@@ -95,15 +93,13 @@ class Game constructor(
     }
 
     fun getStartField() {
-        gameOver = false
-        //чистое поле
+        this.gameOver = false
         for (x in 0 until 4) {
             for (y in 0 until 4) {
                 val boxToField = Box(x, y)
                 field[boxToField] = null
             }
         }
-        //начальные элементы
         val box1 = createRandomBox()
         val box2 = createRandomBox()
         field[box1!!.first] = box1.second
@@ -121,7 +117,7 @@ class Game constructor(
         return overwriteField
     }
 
-    private fun getEmptyBoxs(): List<Box> {
+    fun getEmptyBoxs(): List<Box> {
         val emptyBoxs = ArrayList<Box>()
         for (i in 0 until 4) {
             for (j in 0 until 4) {
@@ -150,6 +146,7 @@ class Game constructor(
             else -> emptyS
         }
     }
+
 }
 
 

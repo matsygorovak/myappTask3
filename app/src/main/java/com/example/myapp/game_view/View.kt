@@ -1,5 +1,6 @@
-package com.example.myapp
+package com.example.myapp.game_view
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,17 +25,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myapp.SecondActivity
 import com.example.myapp.logic.Direction
 import com.example.myapp.logic.Game
+import com.example.myapp.prefs
 import com.example.myapp.ui.theme.Peach
 import com.example.myapp.ui.theme.emptyS
 
@@ -43,8 +48,9 @@ fun View() {
     val game by remember { mutableStateOf(Game()) }
     var score by remember { mutableStateOf(0) }
     var gameOver by remember { mutableStateOf(false) }
-    var color by remember { mutableStateOf(Color(0xffebe7e1)) }
-    var highScore by remember { mutableStateOf(0) }
+    var color by remember { mutableStateOf(Color(0xffffffff)) }
+    val mContext = LocalContext.current
+    var currentNumber by rememberSaveable { mutableStateOf(0) }
 
     Column {
 
@@ -72,13 +78,20 @@ fun View() {
             ScoreBox(gameScore = score)
 
             Column {
-                HighScoreBox(highGameScore = highScore)
+                currentNumber = prefs.number
+                HighScoreBox(highGameScore = currentNumber)
 
                 Button(
                     onClick = {
+                        score = game.score
                         game.getStartField()
                         gameOver = false
-                        score = game.score
+                        currentNumber = prefs.number
+                        if (game.score > currentNumber) {
+                            currentNumber = game.score
+                            prefs.number = currentNumber
+
+                        }
                     },
                     modifier = Modifier
                         .size(width = 100.dp, height = 30.dp)
@@ -99,8 +112,21 @@ fun View() {
 
         }
         if (gameOver) {
+            currentNumber = prefs.number
+            if (game.score > currentNumber) {
+                currentNumber = game.score
+                prefs.number = currentNumber
+
+            }
+
             Column {
-                highScore = game.highScore
+                currentNumber = prefs.number
+                if (game.score > currentNumber) {
+                    currentNumber = game.score
+                    prefs.number = currentNumber
+
+                }
+
                 Text(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -176,9 +202,11 @@ fun View() {
             }
             Button(
                 onClick = {
+
                     game.moveField(Direction.DOWN)
                     score = game.score
                     gameOver = game.gameOver
+
                 },
                 modifier = Modifier
                     .wrapContentSize(Alignment.Center),
@@ -200,6 +228,7 @@ fun View() {
                     score = game.score
                     gameOver = game.gameOver
 
+
                 },
                 modifier = Modifier
                     .wrapContentSize(Alignment.Center),
@@ -220,6 +249,7 @@ fun View() {
                     game.moveField(Direction.RIGHT)
                     score = game.score
                     gameOver = game.gameOver
+
                 },
                 modifier = Modifier
                     .wrapContentSize(Alignment.Center),
@@ -236,8 +266,31 @@ fun View() {
                 )
             }
         }
+        Button(
+            onClick = {
+                score = game.score
+                gameOver = game.gameOver
+
+                mContext.startActivity(Intent(mContext, SecondActivity::class.java))
+            },
+
+            modifier = Modifier
+                .wrapContentSize(Alignment.Center),
+            shape = RoundedCornerShape(4.dp),
+            colors = ButtonDefaults.buttonColors(
+                emptyS
+            )
+        ) {
+            Text(
+                fontSize = 20.sp,
+                text = "Menu",
+                color = Color.White,
+                fontWeight = FontWeight.ExtraBold
+            )
+        }
     }
 }
+
 
 @Composable
 fun ScoreBox(gameScore: Int) {
